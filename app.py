@@ -136,15 +136,26 @@ llm = ChatGroq(
     temperature=0.1,
     max_tokens=1024
 )
-query="What is Attention Mechanism?"
+query="Who is Sumit Sahu and what is his gmail-id?"
 query_vector = embedding_model.encode(query).tolist()
 
-
-prompt = f"Use the context provided and give the anser of the users query:{query}"
 
 search_results = qdrant_client.query_points(
     collection_name=collection_name,
     query=query_vector,
-    limit=1  # Return the top 1 most similar vector
+    limit=5  # Return the top 5 most similar vector
 )
-print(search_results)
+
+contexts = []
+
+for point in search_results.points:
+
+    contexts.append(
+        point.payload["text"]
+    )
+
+final_context = "\n\n".join(contexts)
+prompt = f"Use the context provided {final_context} and give the answer in 3 points only. The users query:{query}"
+
+answer = llm.invoke(prompt)
+print(answer.content)
