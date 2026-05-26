@@ -18,8 +18,11 @@ load_dotenv()
 
 class DocumentIngestion:
 
-    def loadDoc():
-        path = "data/pdf"
+    def __init__(self,config:Config):
+        self.config = config
+
+    def loadDoc(self):
+        path = self.config.path
         directory_loader = DirectoryLoader(
             path,
             glob = "**/*.pdf",
@@ -29,25 +32,17 @@ class DocumentIngestion:
         docs = directory_loader.load()
         return docs
     
-    def chunking(docs:list[Document])->list[Document]:
+    def chunking(self, docs:list[Document])->list[Document]:
         chunking_model = HuggingFaceEmbeddings(
-            model_name = Config.chunking_model
+            model_name = self.config.chunking_model
         )
         text_splitter = SemanticChunker(
             chunking_model,
-            breakpoint_threshold_type="percentile",
-            breakpoint_threshold_amount=95
+            breakpoint_threshold_type= Config.breakpoint_threshold_type,
+            breakpoint_threshold_amount = Config.breakpoint_threshold_amount
         )
         chunks = text_splitter.split_documents(docs)
         return chunks
     
-    def vector_embedding(chunks:list[Document]):
-        model = SentenceTransformer(Config.embedding_model)
-        # for chunk in chunks:
-        #     model.encode(chunk.page_content)
-        for idx, chunk in enumerate(chunks):
-            text = chunk.page_content
-            source = chunk.metadata.get("source", "unknown")
-            page = chunk.metadata.get("page", 0)
-
-                
+    def load_and_chunk(self)->list[Document]:
+        self.chunking(self.loadDoc())
