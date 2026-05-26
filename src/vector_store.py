@@ -60,3 +60,12 @@ class VectorStore:
             )
             print(f"Inserted {len(points)} new chunks")
         return len(points)
+    
+    def search(self, query: str, top_k: int | None = None) -> list[str]:
+        vector = self.embdeddin_model.encode(query).tolist()
+        results = self.client.query_points(
+            collection_name=self.settings.collection_name,
+            query=vector,
+            limit=top_k or self.settings.top_k,
+        )
+        return [p.payload["text"] for p in results.points]
