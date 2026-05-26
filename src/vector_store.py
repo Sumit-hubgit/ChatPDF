@@ -1,5 +1,6 @@
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct, Document , UpdateMode
+from sentence_transformers import SentenceTransformer
 import hashlib
 from config import Config
 
@@ -10,6 +11,7 @@ class VectorStore:
             url = config.qdrant_url,
             api_key = config.qdrant_api_key
         )
+        self.embdeddin_model = SentenceTransformer(self.config.embedding_model)
     def _ensure_collection(self)->None:
        collections = self.client.get_collections().collections
        collections_names = [c.name for c in collections]
@@ -23,3 +25,38 @@ class VectorStore:
            )
     def _make_id(source:str, page:int, text:str)->str:
         return hashlib.md5(f"{source}_{page}_{text}".encode()).hexdigest()
+    
+    def _exists(self, point_id: str) -> bool:
+        return len(self.client.retrieve(
+            collection_name=self.config.collection_name,
+            ids=[point_id],
+            with_vectors=False,
+            with_payload=False,
+        )) > 0
+    
+    def ingest(self, chunks:list[Document]):
+        points = []
+        for chunk in chunks:
+            text = chunk.page_content
+            source = chunk.metadata.get("souce","unknown")
+            page = chunk.metadata("page",0)
+            point_id = self._make_id(source,page,text)
+
+            if self._exists(point_id):
+                continue
+            vector = self.embdeddin_model.encode(text).tolist()
+            payload = {"text":text, "source":source, "page":page}
+            points.append(
+                PointStruct(
+                    id = point_id,
+                    vector = vector,
+                    payload=payload
+                )
+            )
+        if(len(points)>0):
+            self.client.upsert(
+                collection_name = self.config.collection_name
+                points = points
+            )
+            print(f"Inserted {len(points)} new chunks")
+        return len(points)
