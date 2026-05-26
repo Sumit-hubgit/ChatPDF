@@ -55,7 +55,7 @@ class VectorStore:
             )
         if(len(points)>0):
             self.client.upsert(
-                collection_name = self.config.collection_name
+                collection_name = self.config.collection_name,
                 points = points
             )
             print(f"Inserted {len(points)} new chunks")
