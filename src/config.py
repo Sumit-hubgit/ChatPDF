@@ -14,3 +14,5 @@ class Config:
     collection_name: str ="ChatPDF"
     vector_size = 384
     vector_distance = Distance.COSINE
+    reranker_model = "BAAI/bge-reranker-base"
+    rrf_k = 60
