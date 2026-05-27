@@ -16,3 +16,4 @@ class Config:
     vector_distance = Distance.COSINE
     reranker_model = "BAAI/bge-reranker-base"
     rrf_k = 60
+    rerank_top_k = 5
