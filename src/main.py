@@ -20,6 +20,7 @@ def ingest():
     store.ingest(chunks)
     return chunks
 
+
 if __name__ == "__main__":
     chunks = ingest()
     pipeline = build_pipeline(chunks)
