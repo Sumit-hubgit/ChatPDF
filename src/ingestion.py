@@ -6,7 +6,7 @@ from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct, Document , UpdateMode
 from config import Config
 import hashlib
-from langchain_community import(
+from langchain_community.document_loaders import (
     PyMuPDFLoader,
     DirectoryLoader
 )
@@ -45,4 +45,4 @@ class DocumentIngestion:
         return chunks
     
     def load_and_chunk(self)->list[Document]:
-        self.chunking(self.loadDoc())
+        return self.chunking(self.loadDoc())
