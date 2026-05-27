@@ -5,6 +5,7 @@ from cache import RedisCache
 from retrieval import HybridRetriever, RAGPipeline
 
 config = Config()
+
 def build_pipeline(chunks) -> RAGPipeline:
     cache = RedisCache(config)
     store = VectorStore(config, cache)
