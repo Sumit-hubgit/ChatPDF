@@ -6,17 +6,17 @@ from retrieval import HybridRetriever, RAGPipeline
 
 config = Config()
 def build_pipeline(chunks) -> RAGPipeline:
-    cache = RedisCache(Config)
-    store = VectorStore(Config, cache)
-    retriever = HybridRetriever(chunks, store, Config)
-    return RAGPipeline(Config, retriever, cache, store)
+    cache = RedisCache(config)
+    store = VectorStore(config, cache)
+    retriever = HybridRetriever(chunks, store, config)
+    return RAGPipeline(config, retriever, cache, store)
 
 def ingest():
-    loader = DocumentIngestion(Config)
+    loader = DocumentIngestion(config)
     chunks = loader.load_and_chunk()
 
-    cache = RedisCache(Config)
-    store = VectorStore(Config, cache)
+    cache = RedisCache(config)
+    store = VectorStore(config, cache)
     store.ingest(chunks)
     return chunks
 
