@@ -17,3 +17,8 @@ class Config:
     reranker_model = "BAAI/bge-reranker-base"
     rrf_k = 60
     rerank_top_k = 5
+    redis_port = 19440
+    redis_host = "show-hyperfine-bone-11053.db.redis.io"
+    redis_username = os.getenv("REDIS_USERNAME")
+    redis_password = os.getenv("REDIS_PASSWORD")
+    response_cache_ttl = 3600
