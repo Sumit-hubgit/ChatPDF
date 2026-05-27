@@ -1,8 +1,10 @@
 from langchain_core.documents import Document
+from langchain_groq import ChatGroq
 from vector_store import VectorStore
 from config import Config
 from langchain_community.retrievers import BM25Retriever
 from sentence_transformers import CrossEncoder
+from cache import RedisCache
 
 class HybridRetriever:
     def __init__(self,chunks:list[Document], vectorStore: VectorStore, config:Config):
@@ -45,8 +47,53 @@ class HybridRetriever:
     
     def retrieve(self, query: str, query_vector: list[float]) -> list[Document]:
         bm25_docs = self.bm25.invoke(query)
-        vector_docs = self.vectorStore.search(query_vector, self.settings.vector_top_k)
+        vector_docs = self.vectorStore.search(query_vector, self.config.vector_top_k)
         fused = self._rrf(bm25_docs, vector_docs)
         return self._rerank(query, fused)
 
-print("hello world!!")
+class RAGPipeline:
+    def __init__(self,config:Config, retriever:HybridRetriever, cache:RedisCache, vectorStore:VectorStore):
+        self.config = config
+        self.cache = cache
+        self.retriever = retriever
+        self.cache = cache
+        self.vectorStore = vectorStore
+        self.llm = ChatGroq(
+            api_key= self.config.groq_api_key,
+            model = self.config.llm_model,
+            temperature = self.config.llm_temperature,
+            max_tokens = self.config.max_token
+        )
+
+    def _build_prompt(self, context: str, query: str) -> str:
+        return f"""You are a helpful AI assistant.
+        Answer ONLY from the provided context.
+        If the answer is not in the context, say: "I could not find the answer in the provided documents."
+        Give answers in detailed bullet points.
+        Context:
+        {context}
+        Question:
+        {query}
+        Answer:"""
+    
+    def answer(self, query:str)->str:
+        cached = self.cache.get_response(query)
+        #1.Check response cache first
+        if cached:
+            print("Response served from Redis cache")
+            return cached
+        
+        # 2. Embed query (Redis embedding cache used internally)
+        query_vector =self.cache.get_or_embed(query,self.vectorStore.embdeddin_model).tolist()
+
+        # 3. Hybrid retrieve → RRF → rerank
+        docs = self.retriever.retrieve(query, query_vector)
+        context = "\n\n".join(doc.page_content for doc in docs)
+
+        # 4. LLM
+        response = self.llm.invoke(self._build_prompt(context, query)).content
+
+        # 5. Cache the response
+        self.cache.set_response(query, response)
+
+        return response

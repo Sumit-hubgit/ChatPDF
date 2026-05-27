@@ -16,13 +16,13 @@ class RedisCache:
         return f"embedding:{hashlib.md5(text.encode()).hexdigest()}"
     
     def get_embedding(self, text:str)-> np.ndarray | None:
-        raw = self.client.get(self._embed_key(text))
+        raw = self.redis_client.get(self._embed_key(text))
         if raw:
             return np.frombuffer(raw, dtype=np.float32)
         return None
     
     def set_embedding(self, text: str, vector: np.ndarray) -> None:
-        self.client.set(
+        self.redis_client.set(
             self._embed_key(text),
             vector.astype(np.float32).tobytes()
         )
@@ -40,12 +40,12 @@ class RedisCache:
         return f"response:{hashlib.md5(query.encode()).hexdigest()}"
 
     def get_response(self, query: str) -> str | None:
-        raw = self.client.get(self._response_key(query))
+        raw = self.redis_client.get(self._response_key(query))
         return raw.decode() if raw else None
 
     def set_response(self, query: str, response: str) -> None:
-        self.client.setex(
+        self.redis_client.setex(
             self._response_key(query),
-            self.ttl,
+            self.response_cache_ttl,
             response,
         )
