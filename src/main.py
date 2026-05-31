@@ -26,6 +26,6 @@ if __name__ == "__main__":
     chunks = ingest()
     pipeline = build_pipeline(chunks)
 
-    query = "What is Positional Encoding?"
+    query = "What are Transformers?"
     answer = pipeline.answer(query)
     print("\nFINAL ANSWER:\n", answer)
