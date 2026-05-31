@@ -41,6 +41,7 @@ class RedisCache:
 
     def get_response(self, query: str) -> str | None:
         raw = self.redis_client.get(self._response_key(query))
+        print("getting response form the cache")
         return raw.decode() if raw else None
 
     def set_response(self, query: str, response: str) -> None:

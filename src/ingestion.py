@@ -38,8 +38,8 @@ class DocumentIngestion:
         )
         text_splitter = SemanticChunker(
             chunking_model,
-            breakpoint_threshold_type= Config.breakpoint_threshold_type,
-            breakpoint_threshold_amount = Config.breakpoint_threshold_amount
+            breakpoint_threshold_type= self.config.breakpoint_threshold_type,
+            breakpoint_threshold_amount = self.config.breakpoint_threshold_amount
         )
         chunks = text_splitter.split_documents(docs)
         return chunks
