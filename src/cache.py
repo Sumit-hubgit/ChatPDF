@@ -1,7 +1,10 @@
 import redis
 import hashlib
 import numpy as np
+import logging
 from config import Config
+
+logger = logging.getLogger(__name__)
 class RedisCache:
     def __init__(self, config:Config):
         self.redis_client = redis.Redis(
@@ -41,7 +44,7 @@ class RedisCache:
 
     def get_response(self, query: str) -> str | None:
         raw = self.redis_client.get(self._response_key(query))
-        print("getting response form the cache")
+        logger.debug("getting response from the cache")
         return raw.decode() if raw else None
 
     def set_response(self, query: str, response: str) -> None:
