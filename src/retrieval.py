@@ -5,7 +5,7 @@ from config import Config
 from langchain_community.retrievers import BM25Retriever
 from sentence_transformers import CrossEncoder
 from cache import RedisCache
-
+from prompttemplate import PromptManager
 class HybridRetriever:
     def __init__(self,chunks:list[Document], vectorStore: VectorStore, config:Config):
         self.chunks = chunks
@@ -64,6 +64,7 @@ class RAGPipeline:
             temperature = self.config.llm_temperature,
             max_tokens = self.config.max_token
         )
+        self.prompt = PromptManager.rag_prompt()
 
     def _build_prompt(self, context: str, query: str) -> str:
         return f"""You are a helpful AI assistant.
@@ -91,7 +92,12 @@ class RAGPipeline:
         context = "\n\n".join(doc.page_content for doc in docs)
 
         # 4. LLM
-        response = self.llm.invoke(self._build_prompt(context, query)).content
+        final_prompt = self.prompt.invoke({
+            "context": context,
+            "question": query
+        })
+
+        response = self.llm.invoke(final_prompt).content
 
         # 5. Cache the response
         self.cache.set_response(query, response)
