@@ -20,8 +20,7 @@ Rules:
 - Provide detailed explanations
 - Use bullet points and give only 3 pointer summary answer
 - Include important technical details
-- If you answer of he query asked by user is not present in contxt than simply say I don't know the answer
-- Avoid generic one-line answers
+- If you answer of he query asked by user is not present in contxt than simply say I don't know the answer.
 """
             ),
 
