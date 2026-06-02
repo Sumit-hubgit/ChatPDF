@@ -26,6 +26,6 @@ if __name__ == "__main__":
     chunks = ingest()
     pipeline = build_pipeline(chunks)
 
-    query = "What are Transformers?"
+    query = "Who is PM of India?"
     answer = pipeline.answer(query)
     print("\nFINAL ANSWER:\n", answer)
