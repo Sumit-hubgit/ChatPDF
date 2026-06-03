@@ -4,7 +4,7 @@ from langchain_experimental.text_splitter import SemanticChunker
 from langchain_huggingface import HuggingFaceEmbeddings
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct, Document , UpdateMode
-from config import Config
+from .config import Config
 import hashlib
 from langchain_community.document_loaders import (
     PyMuPDFLoader,
@@ -14,6 +14,7 @@ from sentence_transformers import (
     SentenceTransformer,
     CrossEncoder
 )
+from .models import ModelManager
 load_dotenv()
 
 class DocumentIngestion:
@@ -33,9 +34,7 @@ class DocumentIngestion:
         return docs
     
     def chunking(self, docs:list[Document])->list[Document]:
-        chunking_model = HuggingFaceEmbeddings(
-            model_name = self.config.chunking_model
-        )
+        chunking_model = ModelManager.chunking_model
         text_splitter = SemanticChunker(
             chunking_model,
             breakpoint_threshold_type= self.config.breakpoint_threshold_type,

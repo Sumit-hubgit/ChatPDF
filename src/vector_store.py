@@ -2,10 +2,10 @@ from qdrant_client import QdrantClient
 from langchain_core.documents import Document
 from qdrant_client.models import Distance, VectorParams, PointStruct
 from sentence_transformers import SentenceTransformer
-from cache import RedisCache
+from .cache import RedisCache
 import hashlib
-from config import Config
-
+from .config import Config
+from .models import ModelManager
 class VectorStore:
     def __init__(self,config:Config,cache:RedisCache):
         self.config = config
@@ -14,7 +14,7 @@ class VectorStore:
             api_key = config.qdrant_api_key
         )
         self.cache = cache
-        self.embdeddin_model = SentenceTransformer(self.config.embedding_model)
+        self.embdeddin_model = ModelManager.embedding_model
         self._ensure_collection()
     def _ensure_collection(self)->None:
        collections = self.client.get_collections().collections

@@ -2,7 +2,7 @@ import redis
 import hashlib
 import numpy as np
 import logging
-from config import Config
+from .config import Config
 
 logger = logging.getLogger(__name__)
 class RedisCache:
