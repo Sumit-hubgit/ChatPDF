@@ -1,4 +1,4 @@
-from config import Config
+from .config import Config
 from ingestion import DocumentIngestion
 from vector_store import VectorStore
 from cache import RedisCache
@@ -26,6 +26,6 @@ if __name__ == "__main__":
     chunks = ingest()
     pipeline = build_pipeline(chunks)
 
-    query = "Who is PM of India?"
+    query = "What is Modular RAG?"
     answer = pipeline.answer(query)
     print("\nFINAL ANSWER:\n", answer)

@@ -11,7 +11,7 @@ class PromptManager:
                 """
 You are an intelligent RAG assistant.
 
-Answer ONLY using the provided context.
+Answer ONLY using the provided context and don't anwer on your own.
 
 Rules:
 -  Do NOT hallucinate

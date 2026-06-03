@@ -1,21 +1,24 @@
 from langchain_core.documents import Document
 from langchain_groq import ChatGroq
-from vector_store import VectorStore
-from config import Config
+from .vector_store import VectorStore
+from .config import Config
 from langchain_community.retrievers import BM25Retriever
 from sentence_transformers import CrossEncoder
-from cache import RedisCache
-from prompttemplate import PromptManager
+from .cache import RedisCache
+from .prompttemplate import PromptManager
+from .models import ModelManager
+import time
 class HybridRetriever:
     def __init__(self,chunks:list[Document], vectorStore: VectorStore, config:Config):
         self.chunks = chunks
         self.vectorStore = vectorStore
         self.config = config
         self.bm25 = BM25Retriever.from_documents(chunks)
-        self.reranker = CrossEncoder(config.reranker_model)
+        self.reranker = ModelManager.reranker_model
 
     #Recipocal Rak Fusion
     def _rrf(self, bm25_docs:list[Document], vector_docs:list[Document]):
+        print("starting rrf", time.time())
         scores:dict[str,float] = {}
         doc_map: dict[str, Document] = {}
         k = self.config.rrf_k
@@ -31,6 +34,7 @@ class HybridRetriever:
             scores[c] = scores.get(c, 0) + 1 / (k + rank + 1)
 
         ranked = sorted(scores.items(), key=lambda x: x[1], reverse=True)
+        print("completing rrf",time.time())
         return [doc_map[c] for c, _ in ranked]
     
 
@@ -90,8 +94,10 @@ class RAGPipeline:
         # 3. Hybrid retrieve → RRF → rerank
         docs = self.retriever.retrieve(query, query_vector)
         context = "\n\n".join(doc.page_content for doc in docs)
+        #print(context)
 
         # 4. LLM
+        #response = self.llm.invoke(self._build_prompt(context, query)).content
         final_prompt = self.prompt.invoke({
             "context": context,
             "question": query
