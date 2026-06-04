@@ -3,7 +3,7 @@ import hashlib
 import numpy as np
 import logging
 from .config import Config
-
+import time
 logger = logging.getLogger(__name__)
 class RedisCache:
     def __init__(self, config:Config):
@@ -30,10 +30,12 @@ class RedisCache:
             vector.astype(np.float32).tobytes()
         )
     def get_or_embed(self, text:str, encoder):
+        start = time.time()
         cached = self.get_embedding(text)
         if cached is not None:
             return cached
         vector = encoder.encode(text)
+        print("Embedding query in: ",time.time()-start)
         self.set_embedding(text, vector)
         return vector
     
@@ -44,12 +46,14 @@ class RedisCache:
 
     def get_response(self, query: str) -> str | None:
         raw = self.redis_client.get(self._response_key(query))
-        logger.debug("getting response from the cache")
+        logger.info("getting response from the cache")
         return raw.decode() if raw else None
 
     def set_response(self, query: str, response: str) -> None:
+        start = time.time()
         self.redis_client.setex(
             self._response_key(query),
             self.response_cache_ttl,
             response,
         )
+        print("Setting response: ",time.time()-start)

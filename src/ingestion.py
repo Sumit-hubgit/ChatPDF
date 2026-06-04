@@ -15,6 +15,7 @@ from sentence_transformers import (
     CrossEncoder
 )
 from .models import ModelManager
+import time
 load_dotenv()
 
 class DocumentIngestion:
@@ -23,6 +24,7 @@ class DocumentIngestion:
         self.config = config
 
     def loadDoc(self):
+        start = time.time()
         path = self.config.path
         directory_loader = DirectoryLoader(
             path,
@@ -31,9 +33,11 @@ class DocumentIngestion:
             show_progress = False
         )
         docs = directory_loader.load()
+        print("Loaded docs in: ", time.time()-start)
         return docs
     
     def chunking(self, docs:list[Document])->list[Document]:
+        start = time.time()
         chunking_model = ModelManager.chunking_model
         text_splitter = SemanticChunker(
             chunking_model,
@@ -41,6 +45,7 @@ class DocumentIngestion:
             breakpoint_threshold_amount = self.config.breakpoint_threshold_amount
         )
         chunks = text_splitter.split_documents(docs)
+        print("Chunking done in: ", time.time()-start)
         return chunks
     
     def load_and_chunk(self)->list[Document]:
