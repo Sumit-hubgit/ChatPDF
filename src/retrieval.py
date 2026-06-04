@@ -58,6 +58,7 @@ class HybridRetriever:
         fused = self._rrf(bm25_docs, vector_docs)
         print("The retrieval complete time is: ",time.time()-start)
         print(f"RRF produced {len(fused)} candidate docs")
+        return self._rerank(query, fused)
 
 class RAGPipeline:
     def __init__(self,config:Config, retriever:HybridRetriever, cache:RedisCache, vectorStore:VectorStore):
