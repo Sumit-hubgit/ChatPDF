@@ -18,7 +18,7 @@ class HybridRetriever:
 
     #Recipocal Rak Fusion
     def _rrf(self, bm25_docs:list[Document], vector_docs:list[Document]):
-        print("starting rrf", time.time())
+        start = time.time()
         scores:dict[str,float] = {}
         doc_map: dict[str, Document] = {}
         k = self.config.rrf_k
@@ -34,7 +34,7 @@ class HybridRetriever:
             scores[c] = scores.get(c, 0) + 1 / (k + rank + 1)
 
         ranked = sorted(scores.items(), key=lambda x: x[1], reverse=True)
-        print("completing rrf",time.time())
+        print("completing rrf: ",time.time()-start)
         return [doc_map[c] for c, _ in ranked]
     
 
@@ -50,10 +50,14 @@ class HybridRetriever:
         return [doc for doc, _ in top]
     
     def retrieve(self, query: str, query_vector: list[float]) -> list[Document]:
+        start = time.time()
         bm25_docs = self.bm25.invoke(query)
+        print("BM25 doc retrieval took: ",time.time()-start)
         vector_docs = self.vectorStore.search(query_vector, self.config.vector_top_k)
+        print("vector search retrieval took: ",time.time()-start)
         fused = self._rrf(bm25_docs, vector_docs)
-        return self._rerank(query, fused)
+        print("The retrieval complete time is: ",time.time()-start)
+        print(f"RRF produced {len(fused)} candidate docs")
 
 class RAGPipeline:
     def __init__(self,config:Config, retriever:HybridRetriever, cache:RedisCache, vectorStore:VectorStore):
@@ -89,23 +93,29 @@ class RAGPipeline:
             return cached
         
         # 2. Embed query (Redis embedding cache used internally)
+        start = time.time()
         query_vector =self.cache.get_or_embed(query,self.vectorStore.embdeddin_model).tolist()
-
+        print("Embedding query took: ",time.time()-start)
         # 3. Hybrid retrieve → RRF → rerank
+        start = time.time()
         docs = self.retriever.retrieve(query, query_vector)
+        print("Hybrid retrieval took: ",time.time()-start)
         context = "\n\n".join(doc.page_content for doc in docs)
-        #print(context)
+        print(len(context))
 
         # 4. LLM
         #response = self.llm.invoke(self._build_prompt(context, query)).content
+        start = time.time()
         final_prompt = self.prompt.invoke({
             "context": context,
             "question": query
         })
-
+        print("Prompt invokation took: ",time.time()-start)
+        start = time.time()
         response = self.llm.invoke(final_prompt).content
-
+        print("Generated answer in: ",time.time()-start)
         # 5. Cache the response
         self.cache.set_response(query, response)
+        
 
         return response
