@@ -16,7 +16,7 @@ class Config:
     collection_name: str ="ChatPDF"
     vector_size = 384
     vector_distance = Distance.COSINE
-    reranker_model = "cross-encoder/ms-marco-MiniLM-L-6-v2"#"BAAI/bge-reranker-base"
+    reranker_model = "cross-encoder/ms-marco-MiniLM-L-6-v2"#"BAAI/bge-reranker-base", "BAAI/bge-reranker-v2-m3"  # best accuracy, multilingual
     rrf_k = 60
     rerank_top_k = 5
     redis_port = 19440
