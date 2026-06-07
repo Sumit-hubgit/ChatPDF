@@ -31,5 +31,8 @@ class Config:
     qdrant_batch_size: int = 50
     vector_top_k=5
     top_k =5
-
+    aws_access_key = os.getenv("AWS_ACCESS_KEY")
+    aws_secret_key = os.getenv("AWS_SECRET_KEY")
+    aws_region = os.getenv("AWS_REGION")
+    aws_bucket = "rag-pipeline1"
 config = Config()
