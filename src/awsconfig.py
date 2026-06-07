@@ -10,3 +10,4 @@ for bucket in response['Buckets']:
 response = s3_client.list_objects_v2(Bucket='rag-pipeline1')
 objects = response.get('Content',[])
 print(objects)
+#this is just sample
