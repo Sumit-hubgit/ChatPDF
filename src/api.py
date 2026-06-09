@@ -7,6 +7,7 @@ from .ingestion import DocumentIngestion
 from .vector_store import VectorStore
 from .retrieval import HybridRetriever, RAGPipeline
 from .cache import RedisCache
+from .awsconfig import AwsOperations
 
 app = FastAPI()
 
@@ -87,3 +88,15 @@ async def upload_pdf(file: UploadFile = File(...)):
     return {
         "message": "Uploaded successfully"
     }
+
+aws = AwsOperations(config)
+@app.post("/upload-aws")
+async def upload(file:UploadFile=File(...)):
+    result = aws.upload_file(
+        file.filename,
+        file.file,
+        folder="uploads"
+    )
+    return result
+
+    
