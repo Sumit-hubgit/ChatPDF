@@ -14,11 +14,11 @@ from .config import Config
 #this is just sample
 
 
-s3_client = boto3.client('s3')
-response = s3_client.list_buckets()
-#print(response)
-for bucket in response['Buckets']:
-    print(bucket['Name'])
+# s3_client = boto3.client('s3')
+# response = s3_client.list_buckets()
+# #print(response)
+# for bucket in response['Buckets']:
+#     print(bucket['Name'])
 
 class AwsOperations:
     def __init__(self,config:Config):
