@@ -10,3 +10,6 @@ langchain-groq
 python-dotenv
 redis
 boto3
+hashlib
+redis
+time
