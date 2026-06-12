@@ -13,3 +13,4 @@ boto3
 hashlib
 redis
 time
+numpy
