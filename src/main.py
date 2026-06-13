@@ -26,6 +26,6 @@ if __name__ == "__main__":
     chunks = ingest()
     pipeline = build_pipeline(chunks)
 
-    query = "What is Modular RAG?"
+    query = "What is Agentic RAG?"
     answer = pipeline.answer(query)
     print("\nFINAL ANSWER:\n", answer)
