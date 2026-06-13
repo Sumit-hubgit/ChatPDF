@@ -14,3 +14,4 @@ hashlib
 redis
 time
 numpy
+retrieval
