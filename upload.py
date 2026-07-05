@@ -4,6 +4,7 @@ import shutil
 
 app = FastAPI()
 
+
 UPLOAD_DIR = "data/pdf"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
